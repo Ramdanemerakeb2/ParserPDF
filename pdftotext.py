@@ -21,7 +21,8 @@ def pdf(arg):
             print(a)
             #os.system(a)
           #  sp.run(["pdf2txt","-o" ,arg,"/tmp/",element, ".txt ", arg,element])
-        #  a = "pdf2txt -p[1] {1}/{2} > {1}/tmp/{2}.txt".format(os.getcwd(),arg, element)  
+        #  a = "pdf2txt -p[1] {1}/{2} > {1}/tmp/{2}.txt".format(os.getcwd(),arg, element) 
+        #asupprimer
         
         
 
