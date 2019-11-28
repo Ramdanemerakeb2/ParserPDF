@@ -4,6 +4,16 @@ import os       #commande de base
 import os.path  #le path du program
 import sys      #argument 
 
+def transformEintoE(element):
+    cpt = 0
+    for i in element :
+        if i == " " :
+            element = element[:cpt] + '\ ' + element[cpt+1:]
+            cpt+=1
+        cpt+=1
+    print(element)
+    return element
+
 def filtre(src,dst):
     for ligne in src:
         print(ligne)
@@ -17,29 +27,32 @@ def pdf(arg):
     for element in os.listdir(arg):
         if element.endswith('.pdf'):
             print(os.getcwd())
-            a = "pdftotext -raw {0}/{1}/{2}  {0}/{1}/tmp/{2}.txt".format(os.getcwd(),arg, element)
-            print(a)
-            #os.system(a)
+            element = transformEintoE(element)
+            titre = element[0:-4]
+            a = "pdftotext -raw -nopgbrk -enc ASCII7 {0}/{1}/{2}  {0}/{1}/tmp/{3}.txt".format(os.getcwd(),arg, element, titre)
+            #print(a)
+            os.system(a)
           #  sp.run(["pdf2txt","-o" ,arg,"/tmp/",element, ".txt ", arg,element])
         #  a = "pdf2txt -p[1] {1}/{2} > {1}/tmp/{2}.txt".format(os.getcwd(),arg, element) 
-        #asupprimer
         
         
 
 def transmog(arg):
-    tmp = "{}/result".format(arg)
-    if os.path.exists(tmp):
-        shutil.rmtree(tmp)
-    os.mkdir(tmp)
-    t = "{}/tmp".format(arg)
-    for element in os.listdir(t):
+    result = "{0}/{1}result".format(os.getcwd(), arg)
+    if os.path.exists(result):
+        shutil.rmtree(result)
+    os.mkdir(result)
+    tmp = "{0}/{1}/tmp".format(os.getcwd(), arg)
+    for element in os.listdir(tmp):
         if element.endswith('.txt'):
             a = "../result/"
+            #element = transformEintoE(element)
+            os.chdir(tmp)
             source = open(element,"r")
             destination = open(a+element, "w")
-            filtre(source,destination)
+            #filtre(source,destination)
             source.close()
-            destination.close()   
+            destination.close()
             
             
             
