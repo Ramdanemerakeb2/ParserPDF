@@ -16,7 +16,7 @@ def transformEintoE(element):
 
 def filtre(src,dst):
     for ligne in src:
-        print(ligne)
+        print(ligne, file=dst)
         
         
 def pdf(arg):
@@ -38,6 +38,7 @@ def pdf(arg):
         
 
 def transmog(arg):
+    origin = "{0}/{1}".format(os.getcwd(), arg)
     result = "{0}/{1}result".format(os.getcwd(), arg)
     if os.path.exists(result):
         shutil.rmtree(result)
@@ -45,14 +46,15 @@ def transmog(arg):
     tmp = "{0}/{1}/tmp".format(os.getcwd(), arg)
     for element in os.listdir(tmp):
         if element.endswith('.txt'):
-            a = "../result/"
             #element = transformEintoE(element)
             os.chdir(tmp)
             source = open(element,"r")
-            destination = open(a+element, "w")
-            #filtre(source,destination)
+            destination = open(result+'/'+element, "w")
+            filtre(source,destination)
             source.close()
             destination.close()
+    print(origin)
+    os.chdir(origin)
             
             
             
@@ -64,10 +66,9 @@ if len(sys.argv) != 2:
 else:
     current = os.getcwd()
     if os.path.exists(sys.argv[1]) & os.path.isdir(sys.argv[1]):
-       # os.chdir(sys.argv[1])
         pdf(sys.argv[1])
         transmog(sys.argv[1])
-       # sp.Popen("rm tmp")
+        os.system("rm -r tmp")
     else:
         #print(sys.argv[1])
         print( "L'argument n'éxiste pas ou n'est pas un répertoire !")
