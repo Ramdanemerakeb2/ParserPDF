@@ -4,7 +4,65 @@ import os       #commande de base
 import os.path  #le path du program
 import sys      #argument 
 
-def transformEintoE(element):
+def compareStr(str1, str2):
+    if len(str1) == len(str2):
+        cpt = 0
+        while cpt < len(str1):
+            if ord(str1[cpt]) == ord(str2[cpt]) or ord(str1[cpt]) == (ord(str2[cpt])+32) or ord(str1[cpt]) == (ord(str2[cpt])-32):
+                cpt+=1
+            else : return False
+        return True
+    return False
+
+def findTitle(src, dst, element):
+    title = author = ""
+    debut = finished = False
+    element = element[:-4]
+    for char in element :
+        if char == '_':
+            break
+        author+=char
+    for ligne in src:
+        if not debut :
+            save = ""
+            cpt = 0
+            done = False
+            while not done :
+                for char in ligne :
+                    if char == " " :
+                        cpt+=1
+                    if cpt < 2 and char != ":" :
+                        save +=char
+                if title == "" :
+                    cpt = 0
+                    for char in element :
+                        if char == " " :
+                            cpt+=1
+                        if cpt < 2 and char != ":" :
+                            title +=char
+                            if char == "_" :
+                                title = ""
+                done = True
+            if compareStr(title, save) : 
+                debut = True
+                print(ligne, file = dst)
+        else if not finished:
+            done = False
+            for char in ligne :
+                while not done :
+                    if compareStr(title, save) : 
+                        debut = True
+                        if (ord(char) >= 65 and ord(char) <= 90) or if (ord(char) >= 97 and ord(char) <= 122) :
+                            tmpAuthor += char
+
+
+        
+
+def filtre(src, dst, element):
+    findTitle(src, dst, element)
+
+# Transform an element to a terminal friendly element
+def transform(element):
     cpt = 0
     for i in element :
         if i == " " :
@@ -12,12 +70,7 @@ def transformEintoE(element):
             cpt+=1
         cpt+=1
     return element
-
-def filtre(src,dst):
-    for ligne in src:
-        print(ligne, file=dst)
-        
-        
+            
 def pdf(arg):
     tmp = "{}/tmp".format(arg)
     if os.path.exists(tmp):
@@ -25,7 +78,7 @@ def pdf(arg):
     os.mkdir(tmp)
     for element in os.listdir(arg):
         if element.endswith('.pdf'):
-            element = transformEintoE(element)
+            element = transform(element)
             titre = element[0:-4]
             a = "pdftotext -raw -nopgbrk -enc ASCII7 {0}/{1}/{2}  {0}/{1}/tmp/{3}.txt".format(os.getcwd(),arg, element, titre)
             os.system(a)
@@ -42,7 +95,7 @@ def transmog(arg):
             os.chdir(tmp)
             source = open(element,"r")
             destination = open(result+'/'+element, "w")
-            filtre(source,destination)
+            filtre(source,destination, element)
             source.close()
             destination.close()
     os.chdir(origin)
@@ -60,7 +113,7 @@ def main(argv):
             transmog(argv[1])
             #os.system("rm -r tmp")
         else:
-            print( "L'argument n'éxiste pas ou n'est pas un répertoire !")
+            print( "L'argument n'existe pas ou n'est pas un répertoire !")
             sys.exit(2)
 
 
