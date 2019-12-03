@@ -14,15 +14,17 @@ def compareStr(str1, str2):
         return True
     return False
 
-def findTitle(src, dst, element):
-    title = author = ""
+def findTitle(src, element):
+    titleToPrint = title = author = tmpAuthor = ""
     debut = finished = False
     element = element[:-4]
     for char in element :
-        if char == '_':
+        if char == '_' or char == '-':
             break
         author+=char
     for ligne in src:
+        if ligne == "matically determine the quality of a summary by\n":
+            break
         if not debut :
             save = ""
             cpt = 0
@@ -30,6 +32,8 @@ def findTitle(src, dst, element):
             while not done :
                 for char in ligne :
                     if char == " " :
+                        cpt+=1
+                    if char == ":":
                         cpt+=1
                     if cpt < 2 and char != ":" :
                         save +=char
@@ -45,21 +49,27 @@ def findTitle(src, dst, element):
                 done = True
             if compareStr(title, save) : 
                 debut = True
-                print(ligne, file = dst)
-        else if not finished:
+                titleToPrint = ligne
+        elif (not finished):
             done = False
             for char in ligne :
-                while not done :
-                    if compareStr(title, save) : 
-                        debut = True
-                        if (ord(char) >= 65 and ord(char) <= 90) or if (ord(char) >= 97 and ord(char) <= 122) :
-                            tmpAuthor += char
+                if (ord(char) >= 65 and ord(char) <= 90) or (ord(char) >= 97 and ord(char) <= 122) :
+                    tmpAuthor += char
+                else :
+                    if compareStr(author, tmpAuthor) : 
+                        finished = True
+                    else :
+                        tmpAuthor = ""
+            if not finished :
+                titleToPrint = titleToPrint[:-1]
+                titleToPrint = titleToPrint + " " +ligne
+    return titleToPrint
 
 
         
 
 def filtre(src, dst, element):
-    findTitle(src, dst, element)
+    print("Titre : " + findTitle(src, element), file = dst)
 
 # Transform an element to a terminal friendly element
 def transform(element):
