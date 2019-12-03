@@ -14,7 +14,33 @@ def compareStr(str1, str2):
         return True
     return False
 
-def findTitle(src, element):
+def Abstract(Contenu):
+    if "Abstract" in Contenu :
+        begin = Contenu.split("Abstract",1)
+    
+    if "ABSTRACT" in Contenu :                                       
+        begin = Contenu.split("ABSTRACT",1)                     
+                       
+    end="1 "
+    
+    if "Index" in Contenu :
+        end = "Index"
+    elif "Keywords" in Contenu :                                      
+        end = "Keywords"
+            
+    
+    try:
+        begin
+    except NameError:
+        return "erreur"
+    else:
+        a = begin[1].split(end)
+        b = a[0].split("\n")
+        abstract = ''.join(b)
+        return abstract
+        
+
+def findTitle(source, element):
     titleToPrint = title = author = tmpAuthor = ""
     debut = finished = False
     element = element[:-4]
@@ -22,7 +48,7 @@ def findTitle(src, element):
         if char == '_' or char == '-':
             break
         author+=char
-    for ligne in src:
+    for ligne in source:
         if ligne == "matically determine the quality of a summary by\n":
             break
         if not debut :
@@ -68,8 +94,25 @@ def findTitle(src, element):
 
         
 
-def filtre(src, dst, element):
-    print("Titre : " + findTitle(src, element), file = dst)
+def resultat(tmp, result, element):
+    os.chdir(tmp)
+
+    source = open(element,"r")
+    destination = open(result+'/'+element, "w")
+    print("Titre : " + findTitle(source, element), file = destination)
+    source.close()
+
+    nom = element[:-4] + '.pdf'
+    print("\nnom du fichier : " + nom, file =destination)
+
+    source = open(element,"r")
+    txt = source.read()
+    r = Abstract(txt)
+    destination.write("\nResumé : ")
+    for i in range(0,len(r)) :                                 
+        destination.write(r[i])
+    source.close()
+    destination.close()
 
 # Transform an element to a terminal friendly element
 def transform(element):
@@ -102,12 +145,7 @@ def transmog(arg):
     tmp = "{0}/{1}/tmp".format(os.getcwd(), arg)
     for element in os.listdir(tmp):
         if element.endswith('.txt'):
-            os.chdir(tmp)
-            source = open(element,"r")
-            destination = open(result+'/'+element, "w")
-            filtre(source,destination, element)
-            source.close()
-            destination.close()
+            resultat(tmp, result, element)
     os.chdir(origin)
  
 
