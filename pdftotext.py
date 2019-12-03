@@ -1,8 +1,8 @@
-import shutil   
-import subprocess as sp 
-import os       
-import os.path  
-import sys      
+import shutil   #pour suprimmer recursivement
+import subprocess as sp #commande 
+import os       #commande de base
+import os.path  #le path du program
+import sys      #argument 
 
 def Resumé(Contenu):
     if "Abstract" in Contenu :
@@ -81,22 +81,55 @@ def transmog(arg):
             source.close()
             destination.close()
     os.chdir(origin)
- 
+          
 
+def xml(arg):  
+    for element in os.listdir(arg):
+        if element.endswith('.pdf'):
+            if not os.path.exists(arg+"/xmlResultat"):
+                os.mkdir(arg+"/xmlResultat")
+            element = element.replace(".pdf", "")
+            source = open("Papersresultat/"+element+".txt", "r")              
+            f = open(arg+"/xmlResultat/"+element+".xml", "w")
+            i=1
+            for line in source:
+                if i == 1:
+                    t = line
+                    t = t[8:]
+                if i == 3:
+                    p = line
+                    p = p[17:]
+                if i == 5:
+                    a = line
+                    a = a[9:]
+                i+=1
+            f.write("<article>\n")          
+            f.write("\t<preamble>"+p+"</preamble>\n")
+            f.write("\t<titre>"+t+"</titre>\n")
+            f.write("\t<abstract>"+a+"</abstract>\n")
+            f.write("</article>")            
+            
 def main(argv):               
-    if len(argv) != 2:
-        print("Un seul argument attendu !")
+    if len(argv) != 3:
+        print("Deux arguments attendus !")
         print(argv)
         sys.exit(2)
     else:
-        current = os.getcwd()
-        if os.path.exists(argv[1]) & os.path.isdir(argv[1]):
-            pdftotext(argv[1])
-            transmog(argv[1])
-            #os.system("rm -r tmp")
-        else:
-            print( "L'argument n'éxiste pas ou n'est pas un répertoire !")
-            sys.exit(2)
+        current = os.getcwd()     
+        if len(argv) == 3:
+            if argv[1] == "-t":
+                if os.path.exists(argv[2]) & os.path.isdir(argv[2]):
+                    pdftotext(argv[2])
+                    transmog(argv[2])
+                    #os.system("rm -r tmp")
+                else:
+                    print( "L'argument n'éxiste pas ou n'est pas un répertoire !")
+                    sys.exit(2)
+            elif argv[1] == "-x":
+                if os.path.exists(argv[2]) & os.path.isdir(argv[2]):
+                    xml(argv[2])
+
+
 
 
 main(sys.argv)
