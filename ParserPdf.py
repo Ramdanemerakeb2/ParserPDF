@@ -49,8 +49,10 @@ def Abstract(Contenu):
         b = a[0].split("\n")
         abstract = ''.join(b)
         return abstract
-        
 
+
+	
+	
 def findTitle(source, element):
     titleToPrint = title = author = tmpAuthor = ""
     debut = finished = False
@@ -99,28 +101,52 @@ def findTitle(source, element):
                 titleToPrint = titleToPrint[:-1]
                 titleToPrint = titleToPrint + " " +ligne
     return titleToPrint[:-1]
-   
+
+def findAutheur(source, element, txt):
+	result=""
+	source = open(element,"r")
+	titre = findTitle(source, element)
+	print(titre)
+	t = txt.split("Abstract",1)
+	auteur = t[0].split(titre,1)
+	for ligne in auteur:
+		ligne = ligne[:-1]
+		if not ligne.isin(titre) :
+			result += ligne
+	return result
 
 def resultat(xml, tmp, result, element):
     os.chdir(tmp)
     source = open(element,"r")
-    destination = open(result+'/'+element, "w")
-
+    destination = open(result+'/'+element, "w") 
+    
+     
     print("Titre : " + findTitle(source, element), file = destination)
     source.close()
+    
 
     nom = element[:-4] + '.pdf'
     print("\nnom du fichier : " + nom, file =destination)
 
-    #if xml :
-        #print(findAutheur(source, element), file = destination)
-
+    if xml :
+        print(findAutheur(source), file = destination)
+	
+    source = open(element,"r")
+    txt = source.read()
+    a = findAutheur(source, element, txt)
+    destination.write("\n\n\n auteur : ")
+    for i in range(0,len(a)) :                                 
+        destination.write(a[i])
+    source.close()
+    
+    
     source = open(element,"r")
     txt = source.read()
     r = Abstract(txt)
     destination.write("\nResumé : ")
     for i in range(0,len(r)) :                                 
-        destination.write(r[i])
+        destination.write(r[i]) 
+        
     source.close()
     destination.close()
 
@@ -211,7 +237,7 @@ def main(argv):
             print("-option non reconnue :")
             print(" -t  version .txt")
             print(" -x  version .xml")
-        os.system("rm -r tmp")
+        #os.system("rm -r tmp")
 
                     
 
