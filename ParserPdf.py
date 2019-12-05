@@ -49,8 +49,6 @@ def findTitle(source, element):
             break
         author+=char
     for ligne in source:
-        if ligne == "matically determine the quality of a summary by\n":
-            break
         if not debut :
             save = ""
             cpt = 0
@@ -90,20 +88,21 @@ def findTitle(source, element):
                 titleToPrint = titleToPrint[:-1]
                 titleToPrint = titleToPrint + " " +ligne
     return titleToPrint[:-1]
+      
 
-
-        
-
-def resultat(tmp, result, element):
+def resultat(xml, tmp, result, element):
     os.chdir(tmp)
-
     source = open(element,"r")
     destination = open(result+'/'+element, "w")
+
     print("Titre : " + findTitle(source, element), file = destination)
     source.close()
 
     nom = element[:-4] + '.pdf'
     print("\nnom du fichier : " + nom, file =destination)
+
+    if xml :
+        print(findAutheur(source, element), file = destination)
 
     source = open(element,"r")
     txt = source.read()
@@ -136,16 +135,22 @@ def pdf(arg):
             a = "pdftotext -raw -nopgbrk -enc ASCII7 {0}/{1}/{2}  {0}/{1}/tmp/{3}.txt".format(os.getcwd(),arg, element, titre)
             os.system(a)
 
-def transmog(arg):
-    origin = "{0}/{1}".format(os.getcwd(), arg)
-    result = "{0}/{1}result".format(os.getcwd(), arg)
+def transmog(argv, directory):
+    origin = "{0}/{1}".format(os.getcwd(), directory)
+    xml = False
+    if (argv[1] == "-t"):
+        result = "{0}/{1}result".format(os.getcwd(), directory)
+    else :
+        result = "{0}/{1}resultToXml".format(os.getcwd(), directory)
+        xml = True
+
     if os.path.exists(result):
         shutil.rmtree(result)
     os.mkdir(result)
-    tmp = "{0}/{1}/tmp".format(os.getcwd(), arg)
+    tmp = "{0}/{1}/tmp".format(os.getcwd(), directory)
     for element in os.listdir(tmp):
         if element.endswith('.txt'):
-            resultat(tmp, result, element)
+            resultat(xml, tmp, result, element)
     os.chdir(origin)
 
 def xml(arg):  
@@ -154,7 +159,7 @@ def xml(arg):
             if not os.path.exists(arg+"/xmlResultat"):
                 os.mkdir(arg+"/xmlResultat")
             element = element.replace(".pdf", "")
-            source = open(arg+"/result/"+element+".txt", "r")              
+            source = open(arg+"/resultToXml/"+element+".txt", "r")              
             f = open(arg+"/xmlResultat/"+element+".xml", "w")
             i=1
             for line in source:
@@ -174,6 +179,7 @@ def xml(arg):
             f.write("\t<abstract>"+a+"</abstract>\n")
             f.write("</article>")  
             source.close()
+            f.close()
  
 
 def main(argv):               
@@ -191,7 +197,7 @@ def main(argv):
         if argv[1] == "-t":
             if os.path.exists(directory) & os.path.isdir(directory):
                 pdf(directory)
-                transmog(directory)
+                transmog(argv, directory)
                 os.system("rm -r tmp")
             else:
                 print( "L'argument n'éxiste pas ou n'est pas un répertoire !")
@@ -199,12 +205,15 @@ def main(argv):
         elif argv[1] == "-x":
             if os.path.exists(directory) & os.path.isdir(directory):
                 pdf(directory)
-                transmog(directory)
+                transmog(argv, directory)
                 os.system("rm -r tmp")
                 os.chdir(current)
                 xml(argv[2])
                 os.chdir(current+"/"+directory)
-                os.system("rm -r result")
+                os.system("rm -r resultToXml")
+            else:
+                print( "L'argument n'éxiste pas ou n'est pas un répertoire !")
+                sys.exit(2)
         else :
             print("-option non reconnue :")
             print(" -t  version .txt")
