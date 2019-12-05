@@ -179,28 +179,36 @@ def xml(arg):
 def main(argv):               
     if len(argv) != 3:
         print("Deux arguments attendus !")
-        print(argv)
+        print("-option attendu :")
+        print(" -t  version .txt")
+        print(" -x  version .xml")
         sys.exit(2)
     else:
-        current = os.getcwd()     
-        if len(argv) == 3:
-            if argv[1] == "-t":
-                if os.path.exists(argv[2]) & os.path.isdir(argv[2]):
-                    pdf(argv[2])
-                    transmog(argv[2])
-                    os.system("rm -r tmp")
-                else:
-                    print( "L'argument n'éxiste pas ou n'est pas un répertoire !")
-                    sys.exit(2)
-            elif argv[1] == "-x":
-                if os.path.exists(argv[2]) & os.path.isdir(argv[2]):
-                    pdf(argv[2])
-                    transmog(argv[2])
-                    os.system("rm -r tmp")
-                    os.chdir(current)
-                    xml(argv[2])
-                    os.chdir(current+"/"+argv[2])
-                    os.system("rm -r result")
+        current = os.getcwd()
+        if not (argv[2].endswith("/")) : directory = argv[2] +"/"
+        else : directory = argv[2]
+
+        if argv[1] == "-t":
+            if os.path.exists(directory) & os.path.isdir(directory):
+                pdf(directory)
+                transmog(directory)
+                os.system("rm -r tmp")
+            else:
+                print( "L'argument n'éxiste pas ou n'est pas un répertoire !")
+                sys.exit(2)
+        elif argv[1] == "-x":
+            if os.path.exists(directory) & os.path.isdir(directory):
+                pdf(directory)
+                transmog(directory)
+                os.system("rm -r tmp")
+                os.chdir(current)
+                xml(argv[2])
+                os.chdir(current+"/"+directory)
+                os.system("rm -r result")
+        else :
+            print("-option non reconnue :")
+            print(" -t  version .txt")
+            print(" -x  version .xml")
                     
 
 main(sys.argv)
