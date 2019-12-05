@@ -4,6 +4,7 @@ import os       #commande de base
 import os.path  #le path du program
 import sys      #argument 
 
+# compare 2 strings without taking care of the capitals letters
 def compareStr(str1, str2):
     if len(str1) == len(str2):
         cpt = 0
@@ -13,6 +14,16 @@ def compareStr(str1, str2):
             else : return False
         return True
     return False
+
+# Transform an element to a terminal friendly element
+def transform(element):
+    cpt = 0
+    for i in element :
+        if i == " " :
+            element = element[:cpt] + '\ ' + element[cpt+1:]
+            cpt+=1
+        cpt+=1
+    return element
 
 def Abstract(Contenu):
     if "Abstract" in Contenu :
@@ -88,7 +99,7 @@ def findTitle(source, element):
                 titleToPrint = titleToPrint[:-1]
                 titleToPrint = titleToPrint + " " +ligne
     return titleToPrint[:-1]
-      
+   
 
 def resultat(xml, tmp, result, element):
     os.chdir(tmp)
@@ -101,8 +112,8 @@ def resultat(xml, tmp, result, element):
     nom = element[:-4] + '.pdf'
     print("\nnom du fichier : " + nom, file =destination)
 
-    if xml :
-        print(findAutheur(source, element), file = destination)
+    #if xml :
+        #print(findAutheur(source, element), file = destination)
 
     source = open(element,"r")
     txt = source.read()
@@ -113,54 +124,15 @@ def resultat(xml, tmp, result, element):
     source.close()
     destination.close()
 
-# Transform an element to a terminal friendly element
-def transform(element):
-    cpt = 0
-    for i in element :
-        if i == " " :
-            element = element[:cpt] + '\ ' + element[cpt+1:]
-            cpt+=1
-        cpt+=1
-    return element
-            
-def pdf(arg):
-    tmp = "{}/tmp".format(arg)
-    if os.path.exists(tmp):
-        shutil.rmtree(tmp)
-    os.mkdir(tmp)
-    for element in os.listdir(arg):
+
+def xml(directory):  
+    for element in os.listdir(directory):
         if element.endswith('.pdf'):
-            element = transform(element)
-            titre = element[0:-4]
-            a = "pdftotext -raw -nopgbrk -enc ASCII7 {0}/{1}/{2}  {0}/{1}/tmp/{3}.txt".format(os.getcwd(),arg, element, titre)
-            os.system(a)
-
-def transmog(argv, directory):
-    origin = "{0}/{1}".format(os.getcwd(), directory)
-    xml = False
-    if (argv[1] == "-t"):
-        result = "{0}/{1}result".format(os.getcwd(), directory)
-    else :
-        result = "{0}/{1}resultToXml".format(os.getcwd(), directory)
-        xml = True
-
-    if os.path.exists(result):
-        shutil.rmtree(result)
-    os.mkdir(result)
-    tmp = "{0}/{1}/tmp".format(os.getcwd(), directory)
-    for element in os.listdir(tmp):
-        if element.endswith('.txt'):
-            resultat(xml, tmp, result, element)
-    os.chdir(origin)
-
-def xml(arg):  
-    for element in os.listdir(arg):
-        if element.endswith('.pdf'):
-            if not os.path.exists(arg+"/xmlResultat"):
-                os.mkdir(arg+"/xmlResultat")
+            if not os.path.exists(directory+"/xmlResultat"):
+                os.mkdir(directory+"/xmlResultat")
             element = element.replace(".pdf", "")
-            source = open(arg+"/resultToXml/"+element+".txt", "r")              
-            f = open(arg+"/xmlResultat/"+element+".xml", "w")
+            source = open(directory+"/resultToXml/"+element+".txt", "r")              
+            f = open(directory+"/xmlResultat/"+element+".xml", "w")
             i=1
             for line in source:
                 if i == 1:
@@ -180,7 +152,36 @@ def xml(arg):
             f.write("</article>")  
             source.close()
             f.close()
+
+def transmog(argv, directory):
+    origin = "{0}/{1}".format(os.getcwd(), directory)
+    xml = False
+    if (argv[1] == "-t"):
+        result = "{0}/{1}result".format(os.getcwd(), directory)
+    else :
+        result = "{0}/{1}resultToXml".format(os.getcwd(), directory)
+        xml = True
+
+    if os.path.exists(result):
+        shutil.rmtree(result)
+    os.mkdir(result)
+    tmp = "{0}/{1}/tmp".format(os.getcwd(), directory)
+    for element in os.listdir(tmp):
+        if element.endswith('.txt'):
+            resultat(xml, tmp, result, element)
+    os.chdir(origin)
  
+def pdf(directory):
+    tmp = "{}/tmp".format(directory)
+    if os.path.exists(tmp):
+        shutil.rmtree(tmp)
+    os.mkdir(tmp)
+    for element in os.listdir(directory):
+        if element.endswith('.pdf'):
+            element = transform(element)
+            titre = element[0:-4]
+            a = "pdftotext -raw -nopgbrk -enc ASCII7 {0}/{1}/{2}  {0}/{1}/tmp/{3}.txt".format(os.getcwd(),directory, element, titre)
+            os.system(a)
 
 def main(argv):               
     if len(argv) != 3:
@@ -193,31 +194,25 @@ def main(argv):
         current = os.getcwd()
         if not (argv[2].endswith("/")) : directory = argv[2] +"/"
         else : directory = argv[2]
-
+        if os.path.exists(directory) & os.path.isdir(directory):
+            pdf(directory)
+        else:
+                print( "L'argument n'éxiste pas ou n'est pas un répertoire !")
+                sys.exit(2)
         if argv[1] == "-t":
-            if os.path.exists(directory) & os.path.isdir(directory):
-                pdf(directory)
-                transmog(argv, directory)
-                os.system("rm -r tmp")
-            else:
-                print( "L'argument n'éxiste pas ou n'est pas un répertoire !")
-                sys.exit(2)
+            transmog(argv, directory)
         elif argv[1] == "-x":
-            if os.path.exists(directory) & os.path.isdir(directory):
-                pdf(directory)
-                transmog(argv, directory)
-                os.system("rm -r tmp")
-                os.chdir(current)
-                xml(argv[2])
-                os.chdir(current+"/"+directory)
-                os.system("rm -r resultToXml")
-            else:
-                print( "L'argument n'éxiste pas ou n'est pas un répertoire !")
-                sys.exit(2)
+            transmog(argv, directory)
+            os.chdir(current)
+            xml(argv[2])
+            os.chdir(current+"/"+directory)
+            os.system("rm -r resultToXml")
         else :
             print("-option non reconnue :")
             print(" -t  version .txt")
             print(" -x  version .xml")
+        os.system("rm -r tmp")
+
                     
 
 main(sys.argv)
